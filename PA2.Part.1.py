@@ -15,6 +15,8 @@
 # Outputs: See individual function docstrings below.
 ###############################################################################
 
+# =============================================================================
+
 
 def newtons_method(f, f_prime, x0, tol = 1e-10, max_iter = 100, return_iterates = False):
     """
@@ -103,7 +105,7 @@ def newtons_method(f, f_prime, x0, tol = 1e-10, max_iter = 100, return_iterates 
         x_next = x_current - f_val / f_prime_val
 
         # Step 4: Compute the step size |x_{n+1} - x_n|
-        diff = abs(x_next - x_current)
+        diff = abs(x_current - x_next)
 
         # Step 5: Record the iterate if the user requested the history
         if return_iterates:
@@ -124,19 +126,138 @@ def newtons_method(f, f_prime, x0, tol = 1e-10, max_iter = 100, return_iterates 
         return x_current, iteration_count, iterates_list, residuals_list
     else:
         return x_current, iteration_count
-
-
-# =============================================================================
-# TODO: Add bisection_method() here following the same pattern.
-#
-#   def bisection_method(f, a, b, tol=1e-10, max_iter=100, return_iterates = False):
-#       
-#       
-#
+    
 # =============================================================================
 
 
-def secant_method(f, x0, x1, tol=1e-10, max_iter=100, return_iterates=False):
+
+# =============================================================================
+
+def bisection_method(f, a, b, tol=1e-10, max_iter=100, return_iterates=False):
+    
+    """
+    Bisection Method for root-finding.
+
+    Computes an approximate root of f(x) = 0 by repeatedly halving
+    an interval [a, b] that contains a sign change, keeping the
+    sub-interval where the sign change persists.
+
+    Parameters
+    ----------
+    f : callable
+        The function whose root we seek. Must accept a single float
+        and return a single float.
+    a : float
+        The left endpoint of the starting interval.
+    b : float
+        The right endpoint of the starting interval.
+    tol : float, optional
+        Convergence tolerance for the interval width (b - a).
+        Default is 1e-10.
+    max_iter : int, optional
+        Maximum number of iterations allowed. Default is 100.
+    return_iterates : bool, optional
+        If True, the function returns the full sequence of midpoint
+        iterates and the residuals |f(m)| at each step. Default is False.
+
+    Returns
+    -------
+    root : float
+        The approximate root (the final midpoint).
+    num_iterations : int
+        The number of iterations performed.
+    iterates : list of float (only if return_iterates is True)
+        The sequence [m1, m2, m3, ...] of all midpoint iterates.
+    residuals : list of float (only if return_iterates is True)
+        The sequence [|f(m1)|, |f(m2)|, ...] of residual magnitudes.
+
+    Raises
+    ------
+    ValueError
+        If the sign-change hypothesis f(a)*f(b) < 0 fails, bisection
+        cannot guarantee a root exists and the method raises an error.
+
+    """
+
+    # ---- Variable declarations ----
+    a = float(a)                   # left endpoint of current interval (double float)
+    b = float(b)                   # right endpoint of current interval (double float)
+    m = 0.0                        # midpoint of current interval (double float)
+    f_a = f(a)                     # f evaluated at left endpoint (double float)
+    f_b = f(b)                     # f evaluated at right endpoint (double float)
+    f_m = 0.0                      # f evaluated at midpoint (double float)
+    iteration_count = 0            # number of iterations performed (integer)
+
+    # ---- Check the sign-change hypothesis ----
+    #   The Intermediate Value Theorem guarantees a root exists in [a, b]
+    #   only if f(a) and f(b) have opposite signs, i.e., f(a)*f(b) < 0.
+    if f_a * f_b > 0:
+        raise ValueError(
+            f"Bisection method requires f(a) * f(b) < 0, but "
+            f"f({a})*f({b}) = {f_a * f_b:.6e} >= 0. "
+            f"No sign change detected on [{a}, {b}]."
+        )
+
+    # ---- Handle edge case: endpoint is already a root ----
+    if f_a == 0:
+        return (a, 0, [a], [0.0]) if return_iterates else (a, 0)
+
+    if f_b == 0:
+        return (b, 0, [b], [0.0]) if return_iterates else (b, 0)
+
+    # If the user wants the full history, initialize storage lists
+    if return_iterates:
+        iterates_list = []                   # stores every midpoint m
+        residuals_list = []                  # stores |f(m)| at each step
+
+    # ---- Main iteration loop ----
+    for iteration_count in range(1, max_iter + 1):
+
+        # Step 1: Compute the midpoint of the current interval
+        m = (a + b) / 2.0
+
+        # Step 2: Evaluate f at the midpoint
+        f_m = f(m)
+
+        # Step 3: Record the iterate if the user requested the history
+        if return_iterates:
+            iterates_list.append(m)
+            residuals_list.append(abs(f_m))
+
+        # Step 4: Check if we landed exactly on a root
+        #   If f(m) = 0, we have found the root exactly and can stop.
+        if f_m == 0:
+            break
+
+        # Step 5: Decide which sub-interval contains the root
+        #   If f(a) and f(m) have opposite signs, the root lies in [a, m],
+        #   so we move b inward. Otherwise, the root lies in [m, b],
+        #   so we move a inward.
+        if f_a * f_m < 0:
+            b = m
+            f_b = f_m
+        else:
+            a = m
+            f_a = f_m
+
+        # Step 6: Check for convergence
+        #   Once the interval width is below the tolerance, the root
+        #   is located precisely enough and we stop.
+        if (b - a) < tol:
+            break
+
+    # ---- Return results ----
+    if return_iterates:
+        return m, iteration_count, iterates_list, residuals_list
+    else:
+        return m, iteration_count
+
+# =============================================================================
+
+
+# =============================================================================
+
+def secant_method(f, x0, x1, tol = 1e-10, max_iter = 100, return_iterates = False):
     """
     Find a root of f(x) = 0 using the secant method.
 
@@ -148,7 +269,7 @@ def secant_method(f, x0, x1, tol=1e-10, max_iter=100, return_iterates=False):
 
     Unlike Newton's method, no derivative evaluation is required, making
     this suitable for functions where f'(x) is expensive or unavailable.
-    The method converges superlinearly with order approximately 1.618
+    The method converges linearly with order approximately 1.618
     (the golden ratio) near a simple root.
 
     Parameters
@@ -222,7 +343,7 @@ def secant_method(f, x0, x1, tol=1e-10, max_iter=100, return_iterates=False):
         x_next = x_current - f_val_curr * ( (x_current - x_previous) / (f_val_curr - f_val_prev))
 
         # Step 4: Compute the step size
-        diff = abs(x_next - x_current)
+        diff = abs(x_current - x_next)
 
         # Step 5: Record the iterate if the user requested the history
         if return_iterates:
@@ -253,23 +374,77 @@ def secant_method(f, x0, x1, tol=1e-10, max_iter=100, return_iterates=False):
 # =============================================================================
 if __name__ == "__main__":
 
-    # ---- Test: find sqrt(2) as the positive root of f(x) = x^2 - 2 ----
+    # ================================================================
+    # Quick verification: find sqrt(2) as the root of f(x) = x^2 - 2
     #   Known root: r = 1.41421356237...
     #   f'(x) = 2x
-    #   Initial guess: x0 = 1.5 (same as the textbook example)
+    # ================================================================
 
     f_test = lambda x: x**2 - 2
     f_prime_test = lambda x: 2 * x
-    x0_test = 1.5
 
+    # ----------------------------------------------------------------
+    # Test 1: Newton's Method (x0 = 1.5)
+    # ----------------------------------------------------------------
     print("=" * 60)
     print("Newton's Method Test: f(x) = x^2 - 2, x0 = 1.5")
     print("Expected root: 1.41421356237...")
     print("=" * 60)
 
-    # Run with iterates returned so we can inspect convergence
     root, num_iter, iterates, residuals = newtons_method(
-        f_test, f_prime_test, x0_test, return_iterates=True
+        f_test, f_prime_test, 1.5, return_iterates=True
+    )
+
+    # Display results in a table format
+    print(f"{'Iter':>4s}  {'x_n':>20s}  {'|f(x_n)|':>15s}")
+    print("-" * 45)
+    for i in range(len(iterates)):
+        print(f"{i:4d}  {iterates[i]:20.15f}  {residuals[i]:15.10e}")
+
+    print("-" * 45)
+    print(f"Approximate root: {root:.15f}")
+    print(f"Iterations used:  {num_iter}")
+    print(f"|f(root)|:        {abs(f_test(root)):.5e}")
+    print("=" * 60)
+
+    print()  # blank line between tests
+
+    # ----------------------------------------------------------------
+    # Test 2: Bisection Method (a = 0, b = 2)
+    # ----------------------------------------------------------------
+    print("=" * 60)
+    print("Bisection Method Test: f(x) = x^2 - 2, [a, b] = [0, 2]")
+    print("Expected root: 1.41421356237...")
+    print("=" * 60)
+
+    root, num_iter, iterates, residuals = bisection_method(
+        f_test, 0, 2, return_iterates=True
+    )
+
+    # Display results in a table format
+    print(f"{'Iter':>4s}  {'m_n':>20s}  {'|f(m_n)|':>15s}")
+    print("-" * 45)
+    for i in range(len(iterates)):
+        print(f"{i+1:4d}  {iterates[i]:20.15f}  {residuals[i]:15.10e}")
+
+    print("-" * 45)
+    print(f"Approximate root: {root:.15f}")
+    print(f"Iterations used:  {num_iter}")
+    print(f"|f(root)|:        {abs(f_test(root)):.5e}")
+    print("=" * 60)
+
+    print()  # blank line between tests
+
+    # ----------------------------------------------------------------
+    # Test 3: Secant Method (x0 = 1, x1 = 2)
+    # ----------------------------------------------------------------
+    print("=" * 60)
+    print("Secant Method Test: f(x) = x^2 - 2, x0 = 1, x1 = 2")
+    print("Expected root: 1.41421356237...")
+    print("=" * 60)
+
+    root, num_iter, iterates, residuals = secant_method(
+        f_test, 1, 2, return_iterates=True
     )
 
     # Display results in a table format
