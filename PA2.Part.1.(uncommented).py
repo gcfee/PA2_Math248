@@ -1,5 +1,5 @@
 ###############################################################################
-# Program: PA2.Part.1.py
+# Program: PA2.Part.1.(uncommented).py
 # Author(s): Griffin Fee, Jack Zettlemoyer, Kai Behrens, Jacob Fitzmaurice
 # Date: 4/21/26
 # Purpose: This program implements classical root-finding methods for
@@ -17,56 +17,6 @@
 
 
 def newtons_method(f, f_prime, x0, tol = 1e-10, max_iter = 100, return_iterates = False):
-    """
-    Newton's Method for root-finding.
-
-    Computes an approximate root of f(x) = 0 using the iteration:
-        x_{n+1} = x_n - f(x_n) / f'(x_n)
-
-    Parameters
-    ----------
-    f : callable
-        The function whose root we seek. Must accept a single float
-        and return a single float.
-    f_prime : callable
-        The derivative of f. Must accept a single float and return
-        a single float.
-    x0 : float
-        The initial guess for the root.
-    tol : float, optional
-        Convergence tolerance for |x_{n+1} - x_n|. Default is 1e-10.
-    max_iter : int, optional
-        Maximum number of iterations allowed. Default is 100.
-    return_iterates : bool, optional
-        If True, the function returns the full sequence of iterates
-        and the residuals |f(x_n)| at each step. Default is False.
-
-    Returns
-    -------
-    root : float
-        The approximate root found by the method.
-    num_iterations : int
-        The number of iterations performed.
-    iterates : list of float (only if return_iterates is True)
-        The sequence [x0, x1, x2, ...] of all iterates.
-    residuals : list of float (only if return_iterates is True)
-        The sequence [|f(x0)|, |f(x1)|, ...] of residual magnitudes.
-
-    Raises
-    ------
-    ZeroDivisionError
-        If f'(x_n) = 0 at any iterate, division by zero is not possible
-        and the method raises an error.
-
-    Examples
-    --------
-    >>> # Find the root of f(x) = x^2 - 2 (i.e., sqrt(2))
-    >>> f = lambda x: x**2 - 2
-    >>> f_prime = lambda x: 2*x
-    >>> root, iters = newtons_method(f, f_prime, 1.5)
-    >>> print(root)
-    1.4142135623730951
-    """
 
     # ---- Variable declarations ----
     x_current = float(x0)          # current iterate x_n (double float)
@@ -137,55 +87,7 @@ def newtons_method(f, f_prime, x0, tol = 1e-10, max_iter = 100, return_iterates 
 
 
 def secant_method(f, x0, x1, tol=1e-10, max_iter=100, return_iterates=False):
-    """
-    Find a root of f(x) = 0 using the secant method.
-
-    The secant method approximates the derivative in Newton's method with a
-    finite difference, using the two most recent iterates to construct a
-    secant line whose x-intercept becomes the next iterate:
-
-        x_{n+1} = x_n - f(x_n) * (x_n - x_{n-1}) / (f(x_n) - f(x_{n-1}))
-
-    Unlike Newton's method, no derivative evaluation is required, making
-    this suitable for functions where f'(x) is expensive or unavailable.
-    The method converges superlinearly with order approximately 1.618
-    (the golden ratio) near a simple root.
-
-    Parameters
-    ----------
-    f : callable
-        The function whose root is sought. Must accept and return a float.
-    x0 : float
-        First initial guess.
-    x1 : float
-        Second initial guess (should differ from x0).
-    tol : float, optional
-        Convergence tolerance on the step size |x_{n+1} - x_n|.
-        Default is 1e-10.
-    max_iter : int, optional
-        Maximum number of iterations before stopping. Default is 100.
-    return_iterates : bool, optional
-        If True, return the full history of iterates and residuals.
-        Default is False.
-
-    Returns
-    -------
-    x_current : float
-        The approximate root.
-    iteration_count : int
-        Number of iterations performed.
-    iterates_list : list of float
-        (Only if return_iterates=True) All iterates from x0 through the
-        final x_n.
-    residuals_list : list of float
-        (Only if return_iterates=True) |f(x_n)| at each iterate.
-
-    Raises
-    ------
-    ZeroDivisionError
-        If f(x_n) = f(x_{n-1}) at any step, making the secant line
-        horizontal and the next iterate undefined.
-    """
+    
     # ---- Variable declarations ----
     x_current = float(x1)          # current iterate x_n (double float)
     x_previous = float(x0)             # previous iterate x_{n-1} (double float)
